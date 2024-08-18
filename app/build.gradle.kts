@@ -62,6 +62,7 @@ composeCompiler {
 dependencies {
     val room_version = "2.6.1"
     val ktor_version = "2.3.12"
+    val nav_version = "2.7.7"
 
     implementation("androidx.room:room-runtime:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
@@ -72,6 +73,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("androidx.compose.runtime:runtime-livedata:1.6.8")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.navigation:navigation-compose:$nav_version")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
