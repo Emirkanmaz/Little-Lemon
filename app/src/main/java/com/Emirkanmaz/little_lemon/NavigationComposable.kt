@@ -2,7 +2,6 @@ package com.Emirkanmaz.little_lemon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,7 +9,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
 @Composable
-fun Navigation(navController: NavHostController) {
+fun Navigation(navController: NavHostController, database: MenuItemDao.AppDatabase) {
     NavHost(
         navController = navController,
         startDestination = if (hasUserData()) Home.route else Onboarding.route
@@ -19,7 +18,7 @@ fun Navigation(navController: NavHostController) {
             Onboarding(navController)
         }
         composable(Home.route) {
-            Home(navController)
+            Home(navController, database)
         }
         composable(Profile.route) {
             Profile(navController)

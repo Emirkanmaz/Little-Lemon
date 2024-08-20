@@ -1,6 +1,7 @@
 package com.Emirkanmaz.little_lemon
 
 import android.content.Context
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -14,24 +15,30 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,7 +59,6 @@ fun Profile(navController: NavHostController) {
     val scope = rememberCoroutineScope()
 
 
-
     val firstNameFlow: Flow<String> = context.dataStore.data.map { it[FIRST_NAME_KEY] ?: "" }
     val lastNameFlow: Flow<String> = context.dataStore.data.map { it[LAST_NAME_KEY] ?: "" }
     val emailFlow: Flow<String> = context.dataStore.data.map { it[EMAIL_KEY] ?: "" }
@@ -61,6 +67,10 @@ fun Profile(navController: NavHostController) {
     val lastName by lastNameFlow.collectAsState("")
     val email by emailFlow.collectAsState("")
 
+    var newFirstName by rememberSaveable { mutableStateOf(firstName) }
+    var newLastName by rememberSaveable { mutableStateOf(lastName) }
+    var newEmail by rememberSaveable { mutableStateOf(email) }
+    var isEmailValid by rememberSaveable { mutableStateOf(true) }
 
 
 
@@ -93,24 +103,15 @@ fun Profile(navController: NavHostController) {
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF4B4C51)
             )
-            Box(
+            OutlinedTextField(
+                value = newFirstName,
+                onValueChange = { newFirstName = it },
+                label = { Text(text = firstName) },
                 modifier = Modifier
+                    .padding(horizontal = 15.dp, vertical = 5.dp)
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(horizontal = 15.dp)
-                    .border(1.dp, Color(0xFFC8C8C8), RoundedCornerShape(10.dp)),
-                contentAlignment = Alignment.CenterStart
-            ) {
+            )
 
-                Text(
-                    text = firstName,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 10.dp),
-                    fontSize = 14.sp,
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Last name",
                 modifier = Modifier.padding(vertical = 5.dp, horizontal = 15.dp),
@@ -118,24 +119,14 @@ fun Profile(navController: NavHostController) {
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF4B4C51)
             )
-            Box(
+            OutlinedTextField(
+                value = newLastName,
+                onValueChange = { newLastName = it },
+                label = { Text(text = lastName) },
                 modifier = Modifier
+                    .padding(horizontal = 15.dp, vertical = 5.dp)
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(horizontal = 15.dp)
-                    .border(1.dp, Color(0xFFC8C8C8), RoundedCornerShape(10.dp)),
-                contentAlignment = Alignment.CenterStart
-            ) {
-
-                Text(
-                    text = lastName,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 10.dp),
-                    fontSize = 14.sp,
-                )
-            }
-            Spacer(modifier = Modifier.height(20.dp))
+            )
             Text(
                 text = "Email",
                 modifier = Modifier.padding(vertical = 5.dp, horizontal = 15.dp),
@@ -143,24 +134,43 @@ fun Profile(navController: NavHostController) {
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF4B4C51)
             )
-            Box(
+            OutlinedTextField(
+                value = newEmail,
+                onValueChange = {
+                    newEmail = it
+                    isEmailValid = Patterns.EMAIL_ADDRESS.matcher(newEmail).matches()
+                },
+                label = { Text(text = email) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = !isEmailValid,
                 modifier = Modifier
+                    .padding(horizontal = 15.dp, vertical = 5.dp)
                     .fillMaxWidth()
-                    .height(40.dp)
-                    .padding(horizontal = 15.dp)
-                    .border(1.dp, Color(0xFFC8C8C8), RoundedCornerShape(10.dp)),
-                contentAlignment = Alignment.CenterStart
-            ) {
+            )
 
-                Text(
-                    text = email,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 10.dp),
-                    fontSize = 14.sp,
-                )
+            Button(
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFF4CE14),
+                    contentColor = Color.Black
+                ),
+                modifier = Modifier
+                    .padding(15.dp)
+                    .fillMaxWidth()
+                    .padding()
+                    .align(Alignment.CenterHorizontally),
+                onClick = {
+                    if (newFirstName.isNotEmpty() && newLastName.isNotEmpty() && newEmail.isNotEmpty() && isEmailValid) {
+                        scope.launch {
+                            saveUserData(context, newFirstName, newLastName, newEmail)
+                        }
+                        Toast.makeText(context, "Update successful!", Toast.LENGTH_LONG).show()
+
+                    }
+
+                }
+            ) {
+                Text(text = "Update")
             }
-            Spacer(modifier = Modifier.height(20.dp))
 
 
             Button(
@@ -188,15 +198,28 @@ fun Profile(navController: NavHostController) {
     }
 }
 
+private suspend fun saveUserData(
+    context: Context,
+    firstName: String,
+    lastName: String,
+    email: String
+) {
+    context.dataStore.edit { preferences ->
+        preferences[FIRST_NAME_KEY] = firstName
+        preferences[LAST_NAME_KEY] = lastName
+        preferences[EMAIL_KEY] = email
+    }
+}
+
 private suspend fun removeUserData(context: Context) {
     context.dataStore.edit { preferences ->
-        if(preferences.contains(FIRST_NAME_KEY)){
+        if (preferences.contains(FIRST_NAME_KEY)) {
             preferences.remove(FIRST_NAME_KEY)
         }
-        if(preferences.contains(LAST_NAME_KEY)){
+        if (preferences.contains(LAST_NAME_KEY)) {
             preferences.remove(LAST_NAME_KEY)
         }
-        if(preferences.contains(EMAIL_KEY)){
+        if (preferences.contains(EMAIL_KEY)) {
             preferences.remove(EMAIL_KEY)
         }
     }
